@@ -15,3 +15,5 @@ https://chatgpt.com/share/6863ce0a-ee0c-8006-a743-d4f2b7a9d4cf
 
 https://chatgpt.com/share/6863d10a-7200-800b-b3e6-8198c4c082d9
 #FAANGM Tech Roles Guide
+
+https://chatgpt.com/share/6884bcc0-5744-8006-91fa-fd977ff63065 -> Github Project lifecycle
