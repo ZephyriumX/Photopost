@@ -1,6 +1,6 @@
 # 📸 PhotoPost
 
--End-to-end AI-powered assistant that helps users go from a photo idea to a polished social media post.
+- End-to-end AI-powered assistant that helps users go from a photo idea to a polished social media post.
 
 ---
 
@@ -10,3 +10,4 @@
 - Caption Generator (BLIP)
 - Beautification Pipeline
 - FastAPI Backend
+
