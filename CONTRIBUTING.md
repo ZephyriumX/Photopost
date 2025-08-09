@@ -1,9 +1,15 @@
 # 🤝 Contributing to PhotoPost
 
 ## 🔀 Branching Strategy
-- Everyone has their own branch (e.g., `Mehul`, `Uttam`)
-- Task branches are created from personal branches: `User/feat-xyz`
-- All merges go → `features` → `dev` → `main`
+
+- All development work happens in the `features` branch.
+- Each task/issue gets its own folder inside `/features`.
+- Workflow:
+  1. Pull latest `features` branch.
+  2. Work in the assigned folder for your task/issue.
+  3. Commit changes with a message referencing the issue number.
+  4. Push to `features` branch.
+  5. Once tested, merge `features` → `dev` → `main`.
 
 ## 🔧 Commit Messages
 Follow this format:
