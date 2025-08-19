@@ -1,0 +1,86 @@
+# ---------------------
+# Python
+# ---------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# ---------------------
+# Virtual Environments
+# ---------------------
+.env
+.venv
+env/
+venv/
+ENV/
+.ipynb_checkpoints/
+
+# ---------------------
+# OS Files
+# ---------------------
+.DS_Store
+Thumbs.db
+
+# ---------------------
+# IDEs & Editors
+# ---------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ---------------------
+# Logs & Temp
+# ---------------------
+*.log
+logs/
+*.tmp
+*.temp
+
+# ---------------------
+# Datasets (large, keep them local)
+# ---------------------
+data/
+datasets/
+ava_dataset/
+*.csv
+*.tsv
+
+# ---------------------
+# Trained Models
+# ---------------------
+*.h5
+*.hdf5
+*.ckpt
+*.pb
+*.tflite
+*.onnx
+saved_model/
+saved_nima/
+
+# ---------------------
+# Checkpoints
+# ---------------------
+checkpoints/
+*.ckpt.*
+*.index
+*.data-00000-of-00001
+
+# ---------------------
+# Jupyter
+# ---------------------
+.ipynb_checkpoints/
+*.ipynb_convert/
+
+# ---------------------
+# Cache
+# ---------------------
+__pycache__/
+*.cache/
+.cache/
