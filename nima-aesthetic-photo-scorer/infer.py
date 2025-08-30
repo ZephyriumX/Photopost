@@ -1,22 +1,57 @@
-# photopost/nima/infer.py
+# infer.py
+import os
+import argparse
 import numpy as np
 import tensorflow as tf
-from .utils import dist_to_mos
+from tensorflow.keras.models import load_model
+from .model import build_nima
+from .loss import emd_loss
 
-class NIMAKeras:
-    """Simple wrapper to run Keras NIMA models (.h5) and return (mean, std, dist)."""
-    def __init__(self, model_path):
-        self.model = tf.keras.models.load_model(model_path, compile=False)
+IMG_SIZE = (224, 224)
 
-    def score_image(self, img_np):
-        """
-        img_np: Tensor or numpy array with dtype uint8/float. Shape: [H,W,3]
-        Returns: mean (float), std (float), dist (list of 10 floats)
-        """
-        img = tf.image.resize(img_np, (224, 224))
-        img = tf.cast(img, tf.float32)
-        img = tf.keras.applications.mobilenet_v2.preprocess_input(img)
-        x = tf.expand_dims(img, 0)  # batch dim
-        p = self.model(x).numpy()[0]  # (10,)
-        mean, std = dist_to_mos(p)
-        return float(mean), float(std), p.tolist()
+def preprocess_image(img_path):
+    """Load and preprocess image for NIMA."""
+    img = tf.io.read_file(img_path)
+    img = tf.image.decode_jpeg(img, channels=3)
+    img = tf.image.resize(img, IMG_SIZE)
+    img = tf.keras.applications.mobilenet_v2.preprocess_input(img)
+    return tf.expand_dims(img, axis=0)  # shape (1,224,224,3)
+
+def predict_score(model, img_path):
+    """Predict mean aesthetic score + distribution."""
+    x = preprocess_image(img_path)
+    preds = model.predict(x)  # (1,10)
+    preds = preds[0]
+    mean_score = np.sum(np.arange(1, 11) * preds)
+    return mean_score, preds
+
+def main(args):
+    # Load model (supports .h5 or checkpoint dir)
+    if args.model.endswith(".h5"):
+        model = load_model(args.model, custom_objects={"emd_loss": emd_loss})
+    else:
+        # rebuild same model arch and load checkpoint
+        model = build_nima()
+        ckpt = tf.train.Checkpoint(model=model)
+        ckpt.restore(tf.train.latest_checkpoint(args.model)).expect_partial()
+    
+    print(f"[INFO] Model loaded from {args.model}")
+    
+    # Loop over images
+    for img_path in args.images:
+        if not os.path.exists(img_path):
+            print(f"[WARN] Skipping {img_path}, not found.")
+            continue
+        score, dist = predict_score(model, img_path)
+        print(f"\nImage: {img_path}")
+        print(f"  Mean aesthetic score: {score:.3f}")
+        print(f"  Distribution (1–10): {np.round(dist, 4)}")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run NIMA aesthetic inference")
+    parser.add_argument("--model", type=str, required=True,
+                        help="Path to trained .h5 model OR checkpoint dir")
+    parser.add_argument("--images", type=str, nargs="+", required=True,
+                        help="List of image paths to score")
+    args = parser.parse_args()
+    main(args)
