@@ -1,0 +1,26 @@
+# Virtual environment
+venv/
+.env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Model files (large)
+photopost/nima/models/*.h5
+photopost/nima/models/*.tflite
+photopost/nima/models/*.ckpt
+
+# Data (don’t commit AVA dataset)
+data/
