@@ -3,7 +3,7 @@ import argparse
 from PIL import Image
 import torch
 from transformers import BlipProcessor, BlipForConditionalGeneration
-import openai  # OpenRouter API works with OpenAI SDK
+from openai import OpenAI # OpenRouter API works with OpenAI SDK
 import clip
 from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize
 from dotenv import load_dotenv
@@ -16,8 +16,11 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 if not OPENROUTER_API_KEY:
     raise ValueError("OPENROUTER_API_KEY not found. Please set it in your .env file.")
 
-openai.api_key = OPENROUTER_API_KEY
-openai.api_base = "https://openrouter.ai/api/v1"
+client = OpenAI(
+    api_key=OPENROUTER_API_KEY,
+    base_url="https://openrouter.ai/api/v1"
+)
+
 
 # Use device based on availability
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -39,14 +42,15 @@ def load_prompt(prompt_path="prompt.txt"):
         return "bossy mafia in black tuxedo"
 
 def call_llm(prompt: str) -> str:
-    response = openai.ChatCompletion.create(
-        model="mistralai/mistral-7b-instruct",  # or any other available model
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",   # or any other model supported on OpenRouter
         messages=[
             {"role": "system", "content": "You are an Instagram influencer who writes creative, stylish captions."},
             {"role": "user", "content": prompt}
         ]
     )
-    return response['choices'][0]['message']['content'].strip()
+    return response.choices[0].message.content.strip()
+
 
 def describe_image_blip(image_path):
     raw_image = Image.open(image_path).convert('RGB')
@@ -98,24 +102,30 @@ def main(user_prompt=None, tone=None, top_k=3):
         if f.endswith((".jpg", ".png"))
     ])
 
-    for img_path in image_paths:
-        print(f"\n🖼️ Processing: {img_path}")
+    while True:  # 🔁 Loop for regeneration
+        for img_path in image_paths:
+            print(f"\n🖼️ Processing: {img_path}")
 
-        # 1. Describe the image
-        description = describe_image_blip(img_path)
-        print(f"📝 Description: {description}")
+            # 1. Describe the image
+            description = describe_image_blip(img_path)
+            print(f"📝 Description: {description}")
 
-        # 2. Generate 5 captions
-        candidates = [generate_caption(user_prompt, description, tone) for _ in range(5)]
+            # 2. Generate 5 captions
+            candidates = [generate_caption(user_prompt, description, tone) for _ in range(5)]
 
-        # 3. Score with CLIP
-        ranked = score_with_clip(img_path, candidates)
-        ranked.sort(key=lambda x: x[1], reverse=True)
+            # 3. Score with CLIP
+            ranked = score_with_clip(img_path, candidates)
+            ranked.sort(key=lambda x: x[1], reverse=True)
 
-        # 4. Show top results
-        print("\n🏆 Top Captions:")
-        for i, (cap, score) in enumerate(ranked[:top_k], 1):
-            print(f"{i}. ({score:.3f}) {cap}")
+            # 4. Show top results
+            print("\n🏆 Top Captions:")
+            for i, (cap, score) in enumerate(ranked[:top_k], 1):
+                print(f"{i}. ({score:.3f}) {cap}")
+
+        choice = input("\n🔁 Do you want more captions? (yes/no): ").strip().lower()
+        if choice not in ["yes", "y"]:
+            print("\n🎶 That's all folks! Until next caption jam 🎤✨")
+            break
 
 # ------------------------- CLI ENTRY -------------------------
 

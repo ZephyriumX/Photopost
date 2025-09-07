@@ -136,6 +136,9 @@ if __name__ == "__main__":
 
     print(f"\n🧠 Final Search Prompt: {search_prompt}\n")
 
+    with open("prompt.txt", "w") as f:
+        f.write(search_prompt)
+
     os.makedirs("fetched", exist_ok=True)
 
     #  AUTO-DETECT session number
@@ -150,3 +153,7 @@ if __name__ == "__main__":
             print("👋 All done! Stay slayin’ 💅")
             break
         session += 1
+
+
+# In V2 we added: the code to save the final prompt to a file to be used later.
+
